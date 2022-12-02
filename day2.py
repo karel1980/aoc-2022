@@ -9,12 +9,12 @@ LOOKUP = dict(A = ROCK, B = PAPER, C = SCISSORS, X = ROCK, Y = PAPER, Z = SCISSO
 def safe(other):
     return LOOKUP.get(other, other)
 
-def read_strategy():
-    raw= [l.strip().split(' ') for l in open('data/day2').readlines()]
-    return map(lambda r: (safe(r[0]), safe(r[1])), raw)
+def read_strategy(path):
+    raw= [l.strip().split(' ') for l in open(path).readlines()]
+    return map(lambda r: (r[0], r[1]), raw)
 
 def item_score(item):
-    print("item",item)
+    #print("item",item)
     if item == ROCK:
         return 1
     if item == PAPER:
@@ -30,7 +30,9 @@ WIN=6
 LOSE=0
 
 def game_score(other, you):
-    print("game", other, you)
+    other = safe(other)
+    you = safe(you)
+    #print("game", other, you)
     if you == other:
           return DRAW
     if you == ROCK:
@@ -42,8 +44,8 @@ def game_score(other, you):
 
     raise "kapot"
 
-def part1():
-    strategy = read_strategy()
+def part1(path):
+    strategy = read_strategy(path)
 
     total = 0
     for s in strategy:
@@ -51,10 +53,39 @@ def part1():
 
     return total
 
-def part2():
-    return
+STRATEGY=dict(X="lose", Y="draw", Z="win")
 
+def strategy(key):
+    return STRATEGY[key]
 
-print(part1())
+def part2(path):
+    rounds = read_strategy(path)
 
+    total = 0
+    for s in rounds:
+        #print("other plays", safe(s[0]))
+        strat = strategy(s[1])
+        #print("you should", strat)
+        your_item = determine_play(safe(s[0]), strat)
+        #print("your item is", your_item)
+        total += item_score(your_item) + game_score(s[0], your_item)
+
+    return total
+
+def determine_play(other, strategy):
+    #print("determine_play", other, strategy)
+    if strategy == "draw":
+        return other
+
+    if other == ROCK:
+        return PAPER if strategy == "win" else SCISSORS
+    if other == PAPER:
+        return SCISSORS if strategy == "win" else ROCK
+    if other == SCISSORS:
+        return ROCK if strategy == "win" else PAPER
     
+
+if __name__=="__main__":
+    #print(part1())
+    print(part2('data/day2'))
+
