@@ -7,12 +7,27 @@ joined = ','.join(lines)
 
 split = joined.split(',,')
 
-best = 0
-for s in split:
-    calories = sum([int(i) for i in s.split(',')])
+def part1():
+    best = 0
+    for s in split:
+        calories = sum([int(i) for i in s.split(',')])
 
-    if calories > best:
-        best = calories
+        if calories > best:
+            best = calories
 
 
-print(best)
+    return best
+
+
+def part2():
+    allsums = []
+    for s in split:
+        calories = sum([int(i) for i in s.split(',')])
+        allsums.append(calories)
+
+    top3 = sorted(allsums)[-3:]
+    return sum(top3)
+
+
+print(part1())
+print(part2())
