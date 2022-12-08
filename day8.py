@@ -56,3 +56,36 @@ print(result)
 print(visible_count)
 
 #print(is_visible(1, 3, grid))
+
+def count_trees(r, c, direction, grid):
+    tree = grid[r][c]
+    blocked = False
+    count = 0
+    r += direction[0]
+    c += direction[1]
+    while r >= 0 and r < height and c >= 0 and c < width and not blocked:
+        count += 1
+        if grid[r][c] >= tree:
+            blocked = True
+        r += direction[0]
+        c += direction[1]
+
+    return count
+
+def scenic_score(r, c, grid):
+    result = 1
+    result *= count_trees(r, c, NORTH, grid)
+    result *= count_trees(r, c, SOUTH, grid)
+    result *= count_trees(r, c, EAST, grid)
+    result *= count_trees(r, c, WEST, grid)
+
+    return result
+
+best_scenic = -1
+for row in range(height):
+    for col in range(width):
+        s = scenic_score(row, col, grid)
+        if s > best_scenic:
+            best_scenic = s
+
+print(best_scenic)
