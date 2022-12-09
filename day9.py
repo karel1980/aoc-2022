@@ -13,31 +13,33 @@ DIRS['U'] = (-1, 0)
 #instructions = [ parse(l.strip()) for l in open('data/day9.sample').readlines()]
 instructions = [ parse(l.strip()) for l in open('data/day9').readlines()]
 
-head = (0,0)
-tail = (0,0)
-
+snake = [(0,0) for i in range(10) ]
 
 tailpositions = set()
-tailpositions.add(tail)
+tailpositions.add(snake[-1])
 
-def update_tail(t, h):
-    delta = (h[0] - t[0], h[1] - t[1])
+def update_tail(snake):
 
-    # touching -> don't move
-    if abs(delta[0]) < 2 and abs(delta[1]) < 2:
-        return t
+    for i in range(1, len(snake)):
+        h = snake[i-1]
+        t = snake[i]
+        delta = (h[0] - t[0], h[1] - t[1])
 
-    # not touching -> move 1 step in the direction of head, both vertically and horizontally
-    return (t[0] + np.sign(delta[0]), t[1] + np.sign(delta[1]))
-      
+        if abs(delta[0]) < 2 and abs(delta[1]) < 2:
+            # touching -> don't move
+            snake[i] = t
+        else:
+            # not touching -> move 1 step in the direction of head, both vertically and horizontally
+            snake[i] = (t[0] + np.sign(delta[0]), t[1] + np.sign(delta[1]))
 
 for direction, count in instructions:
     d = DIRS[direction]
     for c in range(count):
+        head = snake[0]
         head = (head[0] + d[0], head[1] + d[1])
-        tail = update_tail(tail, head)
-
-        tailpositions.add(tail)
+        snake[0] = head
+        update_tail(snake)
+        tailpositions.add(snake[-1])
 
 
 print(len(tailpositions))
