@@ -39,8 +39,17 @@ def neighbors(pos):
     return result
 
 dist = 0
-candidates = [S]
-scores[S[0]][S[1]] = 0
+candidates = []
+for row in range(height):
+    for col in range(width):
+        if grid[row][col] in ['S','a']:
+            scores[row][col] = 0
+            candidates.append((row,col))
+
+    
+
+for p in candidates:
+    scores[p[0]][p[1]] = 0
 
 while len(candidates) > 0:
     pos = candidates[0]
