@@ -1,7 +1,7 @@
-lines = [l.strip() for l in open('data/day11.sample').readlines()]
+#lines = [l.strip() for l in open('data/day11.sample').readlines()]
+lines = [l.strip() for l in open('data/day11').readlines()]
 
 monkeys = []
-
 
 class Monkey:
     def __init__(self, items, op, test, on_true, on_false):
@@ -22,18 +22,22 @@ def parse_spec(lines):
 
     return Monkey(starting, op, test, on_true, on_false)
 
+total = 1
 for i in range(0, len(lines), 7):
     spec = lines[i:i+6]
-    monkeys.append(parse_spec(spec))
+    
+    monkey = parse_spec(spec)
+    monkeys.append(monkey)
+    total *= monkey.test
 
-
-for round in range(20):
+for round in range(10000):
     for monkey in monkeys:
         items = list(monkey.items)
         for item in monkey.items:
             arg = item if monkey.op[2] == 'old' else int(monkey.op[2])
             new_worry_level = item * arg if monkey.op[1] == '*' else item + arg
-            new_worry_level = int(new_worry_level / 3)
+            new_worry_level %= total
+            #new_worry_level = int(new_worry_level / 3)
             #print('new worry level', new_worry_level)
 
             test_result = new_worry_level % monkey.test == 0
@@ -48,11 +52,11 @@ for round in range(20):
 
     print("round %d ends"%(round+1))
 
-    for m in monkeys:
-        print(m.items)
+    #for m in monkeys:
+    #    print(m.items)
 
 
 inspections = map(lambda m:m.inspections, monkeys)
 top = sorted(inspections)[-2:]
-
-print(top[0] * top[1])
+print("top inspection counts", top)
+print("multiplied", top[0] * top[1])
