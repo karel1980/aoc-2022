@@ -1,3 +1,4 @@
+import functools
 #lines = [ l .strip() for l in open('data/day13.sample').readlines()]
 lines = [ l .strip() for l in open('data/day13').readlines()]
 
@@ -39,11 +40,15 @@ def compare(left, right, indent = 0):
 
 pair_index = 0
 sum_in_order_indices = 0
+packets = []
 for i in range(0, len(lines), 3):
     pair_index += 1
 
     left = eval(lines[i])
     right = eval(lines[i+1])
+
+    packets.append(left)
+    packets.append(right)
 
     print(left, right)
 
@@ -55,3 +60,20 @@ for i in range(0, len(lines), 3):
 
 
 print(sum_in_order_indices)
+
+P2 = [[2]]
+P6 = [[6]]
+packets.append(P2)
+packets.append(P6)
+
+p2 = sorted(packets, key=functools.cmp_to_key(compare), reverse=True)
+
+for l in p2:
+    print(l)
+
+a = p2.index(P2) + 1
+b = p2.index(P6) + 1
+
+print(a)
+print(b)
+print(a*b)
