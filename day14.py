@@ -23,11 +23,22 @@ for spec in lines:
             print('adding',pos)
             coords.add(pos)
 
+# add the floor
+xs = [p[0] for p in coords]
+xmin, xmax = min(xs), max(xs)
+print("cols:",xmin, xmax)
+
+ys = [p[1] for p in coords]
+ymin, ymax = min(ys), max(ys)
+print("rows:",ymin,ymax)
+
+lowest_layer = ymax + 2
+
+for col in range(0, xmax + 500):
+    coords.add((col, lowest_layer))
+
 # coords now contains the full scene, let's start adding sand
 lowest_row = max([p[1] for p in coords])
-
-coords.add((500,-5))
-
 print("lowest row", lowest_row)
 
 
@@ -56,30 +67,40 @@ show(coords)
 
 clock = 0
 falling_off = False
+blocked = False
 
-while not falling_off:
-    sand = (500,0)
-    stopped = False
+entrypoint = (500,0)
 
-    clock+=1
-    while not stopped and not falling_off:
-        if down(sand) not in coords:
-            sand = down(sand)
-        elif downleft(sand) not in coords:
-            sand = downleft(sand)
-        elif downright(sand) not in coords:
-            sand = downright(sand)
-        else:
-            stopped = True
+clock = 0
+sandlayer = [ ' ' for i in range(10000)]
+sandlayer[500] = 'o'
 
-        if sand[1] > lowest_row:
-            falling_off = True
+layer_num = 0
+def calculate_next_layer(prev_layer, rocklayer):
+    result = [ ' ' for i in range(1000)]
+    for i in range(len(rocklayer)):
+        if rocklayer[i] == '#':
+            result[i] = '#'
 
-        #show(coords,sand)
+    for i in range(1,len(prev_layer)-1):
+        if 'o' in prev_layer[i-1:i+2] and rocklayer[i] != '#':
+            result[i] = 'o'
 
-    if not falling_off:
-        coords.add(sand)
-      
-print(clock - 1)
+    return result
+
+
+total_sand = 1
+while layer_num != lowest_layer:
+    layer_num += 1
+    layercoords =  list(map(lambda c: c[0], filter(lambda c: c[1] == layer_num, coords)))
+    rocklayer = [' ' for i in range(len(sandlayer)) ]
+    for col in layercoords:
+        rocklayer[col] = '#'
+    sandlayer = calculate_next_layer(sandlayer, rocklayer)
+    total_sand += sum([ 1 if c == 'o' else 0 for c in sandlayer])
+    print("".join(sandlayer[250:750]))
+    print(total_sand)
+
+print(total_sand)
 
 
