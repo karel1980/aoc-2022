@@ -1,7 +1,9 @@
 import re
 
-#lines = [ l.strip() for l in open('data/day15').readlines() ]
-lines = [ l.strip() for l in open('data/day15.sample').readlines() ]
+lines = [ l.strip() for l in open('data/day15').readlines() ]
+#lines = [ l.strip() for l in open('data/day15.sample').readlines() ]
+
+MAX_XY = 4000000
 
 
 def simplify_ranges(ranges):
@@ -14,6 +16,8 @@ def simplify_ranges(ranges):
         if b[0] <= a[1] + 1:
             del ranges[i+1]
             ranges[i] = (a[0], max(a[1],b[1]))
+        else:
+            i += 1
 
     return ranges
 
@@ -40,9 +44,9 @@ def count_without_beacons(sensors, target):
         delta = sensor_range - distance_from_target
         ranges.add((sx - delta, sx + delta))
     
-    print("before simplification", list(sorted(ranges)))
+    #print("before simplification", list(sorted(ranges)))
     ranges = simplify_ranges(ranges)
-    print("after simplification", list(sorted(ranges)))
+    #print("after simplification", list(sorted(ranges)))
 
     not_sensored = 0
     for r in ranges:
@@ -56,6 +60,11 @@ def count_without_beacons(sensors, target):
 #    positions -= bxs
     #print(bxs)
     #print(list(sorted(positions)))
+
+    if len(list(filter(lambda r: r[1] >= 0 or r[0] <= MAX_XY+1, ranges))) > 1:
+        print(target, ranges)
+        print(4000000 * (ranges[0][1]+1) + target) 
+        raise 'done'
 
     return not_sensored - len(set(bxs))
 
@@ -82,3 +91,10 @@ def parse_lines(lines):
 sensors = parse_lines(lines)
 print("number of non-beacons at line 10:", count_without_beacons(sensors, 10))
 print("number of non-beacons at line 2M:", count_without_beacons(sensors, 2000000))
+
+for i in range(MAX_XY+1):
+    if i % 1000 == 0:
+        print("XXX", i)
+    count_without_beacons(sensors, i)
+
+
