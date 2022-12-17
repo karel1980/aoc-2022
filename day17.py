@@ -8,7 +8,7 @@ blocks.append ( ["##", "##"])
 
 class Block:
     def __init__(self, spec, current_level):
-        print("creating block with spec", spec, "current level", current_level)
+        #print("creating block with spec", spec, "current level", current_level)
         self.spec = spec
         self.x = 2
         self.y = current_level + len(spec) + 3 - 1
@@ -74,8 +74,6 @@ world = []
 gusts = [ l.strip() for l in open('data/day17').readlines() ][0]
 gust_idx = 0
 
-fallen = 0
-
 def apply_gust(gust, world, block):
     if gust == '<':
         block.left()
@@ -88,25 +86,88 @@ def fall(world, block):
 
     return result
 
-while fallen < 2022:
-    block_spec = blocks[fallen % len(blocks)]
-    block = Block(block_spec, len(world))
+fallen = 0
+def drop(count):
+    global world
+    global blocks
+    global gusts
+    global gust_idx
+    global fallen
+    for f in range(count):
+        block_spec = blocks[fallen % len(blocks)]
+        block = Block(block_spec, len(world))
+        
+        stopped = False
+        while not stopped:
+            #print("block", fallen)
+            #print("block starts at ", block.x, block.y)
+            apply_gust(gusts[gust_idx%len(gusts)], world, block)
+            #print("after gust", gusts[gust_idx%len(gusts)], block.x, block.y)
+            gust_idx += 1
+            stopped = not fall(world, block)
+            #print("after fall", block.x, block.y)
+              
+
+        #for line in range(len(world)-1, -1, -1):
+        #    print(world[line])
+
+        fallen +=1
+    return len(world)
+
     
-    stopped = False
-    while not stopped:
-        print("block", fallen)
-        print("block starts at ", block.x, block.y)
-        apply_gust(gusts[gust_idx%len(gusts)], world, block)
-        print("after gust", gusts[gust_idx%len(gusts)], block.x, block.y)
-        gust_idx += 1
-        stopped = not fall(world, block)
-        print("after fall", block.x, block.y)
-          
+# part 1
+#print(drop(2022))
 
-    #for line in range(len(world)-1, -1, -1):
-    #    print(world[line])
+def show(w):
+    print()
+    print()
+    for i in range(11):
+        drop(1)
+        print("-----------------")
+        for l in reversed(w):
+            print(l)
 
-    fallen +=1
+def incdrop(n):
+    before = len(world)
+    return drop(n) - before
 
-    
-print(len(world))
+def determine_real_cycle():
+    cycle = len(gusts) * len(blocks)
+    global fallen
+    global world
+
+    fallen = 0
+    world = []
+    incdrop(cycle)
+    marker = world[-cycle:]
+    result = 0
+    same = False
+    while not same:
+        incdrop(1)
+        same = world[-cycle:] == marker
+        result += 1
+
+    return result
+  
+
+# part 2
+#rc = determine_real_cycle()
+rc = determine_real_cycle()
+cycle_height = incdrop(rc)
+
+print("cycle", rc)
+print("cycle_height", cycle_height)
+
+fallen = 0
+world = []
+first = incdrop(rc)
+
+for i in range(100):
+    T = int(1e12)
+    R = T % rc
+    n = int(T/rc) - 1
+    Q = incdrop(R * (i+1))
+    Q = incdrop(R)
+
+    H = first + n * cycle_height + Q
+    print(H)
