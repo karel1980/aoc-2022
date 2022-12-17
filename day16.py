@@ -52,46 +52,55 @@ def create_distance_matrix(valves):
 
     return result
 
-def explain(path, distances, flowrates):
-    clock = 0
-    score = 0
-    c = path[0]
-    pressure = 0
-    for p in path[1:]:
-        print("move to", p)
-        print("cost / flowrate", distances[c][p], flowrates[p])
-        gain = (30 - clock - distances[c][p]) * flowrates[p]
-        score += gain
-        print("gain / score", gain, score)
-        pressure+= flowrates[p]
-        print("flowrate", pressure)
-        
 
 best = 0
-def find_best_solution(location, valves, distances, flowrates, clock, opened, score, path):
+def find_best_solution(location1, location2, valves, distances, flowrates, clock1, clock2, opened, score, path1, path2):
     global best        
 
-    moves = [ dst for dst in valves.keys() if flowrates[dst] > 0 and dst not in opened and clock+distances[location][dst] < 30 ]
-    # todo: sort moves to go for the best improvement (remaining clock * flowrate) first?
-    #print("at", location, "with opened", opened, "moves are", moves)
+    if location1 == 'nop':
+        moves1 = ['nop']  
+    else: moves1 = [ dst for dst in valves.keys() if flowrates[dst] > 0 and dst not in opened and clock1+distances[location1][dst] < 26 ]
+    if location2 == 'nop':
+        moves2 = ['nop']
+    else: moves2 = [ dst for dst in valves.keys() if flowrates[dst] > 0 and dst not in opened and clock2+distances[location2][dst] < 26 ]
 
-    for dst in moves:
-        #print("opening", dst)
-        opened.add(dst)
-        path.append(dst)
-        gain = (30 - clock - distances[location][dst]) * flowrates[dst]
-        #print("from", location,"to",dst,"timecost", distances[location][dst], "flowrate", flowrates[dst], "gain", gain)
+    # if one cannot make valid moves, but the other can, we must let one idle
+    if len(moves1) == 0 and len(moves2) > 0:
+        moves1 = ['nop']
+    if len(moves2) == 0 and len(moves1) > 0:
+        moves2 = ['nop']
+
+    moves = []
+    for m1 in moves1:
+        for m2 in moves2:
+            if m1 != m2:
+                moves.append((m1,m2))
+
+    for dst1,dst2 in moves:
+        if dst1 != 'nop':
+            opened.add(dst1)
+        if dst2 != 'nop':
+            opened.add(dst2)
+        path1.append(dst1)
+        path2.append(dst2)
+        gain = 0 if dst1 == 'nop' else (26 - clock1 - distances[location1][dst1]) * flowrates[dst1]
+        gain += 0 if dst2 == 'nop' else (26 - clock2 - distances[location2][dst2]) * flowrates[dst2]
       
         if score + gain > best:
             best = score + gain
             print("new best", best)
-            print("path", path)
+            print("path1", path1)
+            print("path2", path2)
             #explain(path, distances, flowrates)
 
-        find_best_solution(dst, valves, distances, flowrates, clock + distances[location][dst], opened, score + gain, path)
+        find_best_solution(dst1, dst2, valves, distances, flowrates, clock1 + (0 if dst1 == 'nop' else distances[location1][dst1]), clock2 + (0 if dst2 == 'nop' else distances[location2][dst2]), opened, score + gain, path1, path2)
         
-        opened.remove(dst)
-        del path[len(path)-1]
+        if dst1 != 'nop':
+            opened.remove(dst1)
+        if dst2 != 'nop':
+            opened.remove(dst2)
+        del path1[len(path1)-1]
+        del path2[len(path2)-1]
     
 
 
@@ -102,5 +111,7 @@ distances = create_distance_matrix(valves)
 for v in distances:
     print("distances from",v, distances[v])
 
-find_best_solution('AA', valves, distances, flowrates, 0, set(['AA']), 0, ['AA'])
+find_best_solution('AA', 'AA', valves, distances, flowrates, 0, 0, set(['AA']), 0, ['AA'], ['AA'])
+
+# TODO: this is very very slow - try to guide the search by sorting moves best-first or using an a*
 
